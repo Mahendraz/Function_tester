@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { getAddress, isAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
-import {approve, getBalance, getToken} from "./Eth/Function.js";
+import {approve, getBalance, getToken} from "./Eth/Token.js";
+import {mintEvents, mintToken} from "./Eth/E20Factory";
 
 export default function Home() {
 
@@ -14,6 +15,12 @@ export default function Home() {
   const [senderAddress, setsenderAddresse] = useState();
   const [userbalance, setuserbalance] = useState();
   const [value, setvalue] = useState();
+  const [name, setName] = useState();
+  const [symbol, setSymbol] = useState();
+  const [mintValue, setMintValue] = useState();
+  const [decimals, setDecimals] = useState();
+  const [deployedContractAddress, setDeployedContractAddress] = useState();
+
   
   function inputtokenAddress(text) {
     settokenAddress(text);
@@ -24,9 +31,22 @@ export default function Home() {
   function inputvalue(text) {
     setvalue(text);
   }
+  function inputName(text) {
+    setName(text);
+  }
+  function inputSymbol(text) {
+    setSymbol(text);
+  }
+  function inputMintValue(text) {
+    setMintValue(text);
+  }
+  function inputDecimals(text) {
+    setDecimals(text);
+  }
 
   useEffect(() => {
     if (typeof window.ethereum !== "undefined") {
+
       setHasMetamask(true);
     }
   });
@@ -51,14 +71,20 @@ export default function Home() {
 
   async function fetchBalance() {
     try {
-      const bal = await getBalance();
-      setuserbalance(bal.balanceOf); 
-     // console.log(userbalance);
+      const tx = await getBalance();
+      setuserbalance(tx?.balanceOf); 
     } catch (e) {
       console.log(e);
     }
   }
+  async function mint() {
+    try {
+      await mintToken(name, symbol, mintValue, decimals);
 
+    } catch (e) {
+      console.log(e);
+    }
+  }
   return (
     <div>
       {hasMetamask ? (
@@ -79,7 +105,14 @@ export default function Home() {
       <p>Sender Addresss: <input onChange={(e) => inputsenderAddress(e.target.value)} /></p>
       <p>Value: <input onChange={(e) => inputvalue(e.target.value)} /></p>
       {isConnected ? <button onClick={() => approve(senderAddress, value)}>Approve</button> : ""}
-
+      
+      <p>Minting new Token</p>
+      <p>Name: <input onChange={(e) => inputName(e.target.value)} /></p>
+      <p>Symbol: <input onChange={(e) => inputSymbol(e.target.value)} /></p>
+      <p>Mint Value: <input onChange={(e) => inputMintValue(e.target.value)} /></p>
+      <p>Decimals: <input onChange={(e) => inputDecimals(e.target.value)} /></p>
+      {isConnected ? <button onClick={() => mint()}>MintToken</button> : ""}
+      {deployedContractAddress ? <p>deployed Contract Address:, {deployedContractAddress}</p>:""}
     </div>
   )
 

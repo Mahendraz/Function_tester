@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import provider from './provider';
-import home from '../index.tsx';
 const Token = require('./artifacts/Token.json');
 
 let ERC20;
