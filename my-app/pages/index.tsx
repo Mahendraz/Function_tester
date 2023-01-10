@@ -2,7 +2,8 @@ import { ethers } from "ethers";
 import { getAddress, isAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 import {approve, getBalance, getToken} from "./Eth/Token.js";
-import {mintEvents, mintToken} from "./Eth/E20Factory";
+import {mintToken} from "./Eth/E20Factory";
+import {creatingPreSale, getPreSale, buyToken} from "./Eth/PreSaleFactory";
 
 export default function Home() {
 
@@ -21,7 +22,26 @@ export default function Home() {
   const [decimals, setDecimals] = useState();
   const [deployedContractAddress, setDeployedContractAddress] = useState();
 
-  
+  const [autoDex, setAutoDex] = useState();
+  const [dexRate, setDexRate] = useState(Boolean);
+  const [liquidity, setLiquidity] = useState();
+  const [lockUpTime, setLockUpTime] = useState();
+  const [rate, setRate] = useState();
+  const [amount, setAmount] = useState();
+  const [startTime, setStartTime] = useState();
+  const [endTime, setEndTime] = useState();
+  const [minVal, setMinVal] = useState();
+  const [maxVal, setMaxVal] = useState();
+  const [softCap, setSoftCap] = useState();
+  const [hardCap, setHardcap] = useState();
+  const [vesStartTime, setVesStartTime] = useState();
+  const [startPercent, setStartPercent] = useState();
+  const [cliffTime, setCliffTime] = useState();
+  const [cliffPercent, setCliffPrecent] = useState();
+  const [vesting, setVesting] = useState(Boolean);
+  const [buyValue, setBuyValue] = useState();
+  const [presaleAddress, setPresaleAddress] = useState();
+
   function inputtokenAddress(text) {
     settokenAddress(text);
   }
@@ -43,6 +63,61 @@ export default function Home() {
   function inputDecimals(text) {
     setDecimals(text);
   }
+  function inputautoDex(text) {
+    setAutoDex(text);
+  }
+  function inputdexRate(text) {
+    setDexRate(text);
+  }
+  function inputliquidity(text) {
+    setLiquidity(text);
+  }
+  function inputlockUpTime(text) {
+    setLockUpTime(text);
+  }
+  function inputrate(text) {
+    setRate(text);
+  }
+  function inputamount(text) {
+    setAmount(text);
+  }
+  function inputstartTime(text) {
+    setStartTime(text);
+  }
+  function inputendTime(text) {
+    setEndTime(text);
+  }
+  function inputminVal(text) {
+    setMinVal(text);
+  }
+  function inputmaxVal(text) {
+    setMaxVal(text);
+  }
+  function inputsoftCap(text) {
+    setSoftCap(text);
+  }
+  function inputhardCap(text) {
+    setHardcap(text);
+  }
+  function inputvesStartTime(text) {
+    setVesStartTime(text);
+  }
+  function inputstartPercent(text) {
+    setStartPercent(text);
+  }
+  function inputcliffTime(text) {
+    setCliffTime(text);
+  }
+  function inputcliffPercent(text) {
+    setCliffPrecent(text);
+  }
+  function inputvesting(text) {
+    setVesting(text);
+  }
+  function inputBuyValue(text) {
+    setBuyValue(text);
+  }
+  
 
   useEffect(() => {
     if (typeof window.ethereum !== "undefined") {
@@ -50,7 +125,6 @@ export default function Home() {
       setHasMetamask(true);
     }
   });
-
   async function connect() {
     if (typeof window.ethereum !== "undefined") {
       try {
@@ -68,7 +142,6 @@ export default function Home() {
       setIsConnected(false);
     }
   }
-
   async function fetchBalance() {
     try {
       const tx = await getBalance();
@@ -85,6 +158,60 @@ export default function Home() {
       console.log(e);
     }
   }
+  function unixHumanTime(unix_timestamp){
+    let date = new Date(unix_timestamp * 1000);
+    let hours = date.getHours();
+    let minutes = "0" + date.getMinutes();
+    let seconds = "0" + date.getSeconds();
+    let formattedTime = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+    return formattedTime
+  }
+  async function getPreSaleInstance() {
+    try {
+      const presale = await getPreSale(tokenAddress);
+      let startTime = (presale?.sale.startTime).toString();
+      let endTime = (presale?.sale.endTime).toString();
+      startTime = await unixHumanTime(startTime);
+      endTime = await unixHumanTime(endTime);
+      let price = (presale?.sale.rate).toString();
+      price = price + " per Ether";
+      const minBuy = ethers.utils.formatEther((presale?.sale.minVal).toString());
+      const maxBuy = ethers.utils.formatEther((presale?.sale.maxVal).toString());
+      setPresaleAddress(presale?.preSaleAddress);
+      console.log({startTime, endTime});
+      console.log({price});
+      console.log({minBuy, maxBuy});
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  async function createPreSale() {
+    try {
+      await creatingPreSale(
+        tokenAddress, 
+        autoDex, 
+        dexRate, 
+        liquidity, 
+        lockUpTime,
+        rate,
+        amount,
+        startTime,
+        endTime,
+        minVal,
+        maxVal,
+        softCap,
+        hardCap,
+        vesStartTime,
+        startPercent,
+        cliffTime,
+        cliffPercent,
+        vesting
+        );
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   return (
     <div>
       {hasMetamask ? (
@@ -112,7 +239,32 @@ export default function Home() {
       <p>Mint Value: <input onChange={(e) => inputMintValue(e.target.value)} /></p>
       <p>Decimals: <input onChange={(e) => inputDecimals(e.target.value)} /></p>
       {isConnected ? <button onClick={() => mint()}>MintToken</button> : ""}
-      {deployedContractAddress ? <p>deployed Contract Address:, {deployedContractAddress}</p>:""}
+
+      <p>Creating new Presale address: 0x7d07771b4CB3D69980132f1Ef668193db307A3a5</p>
+      <p>tokenAddress: <input onChange={(e) => inputtokenAddress(e.target.value)} /></p>
+      <p>autoDex: <input onChange={(e) => inputautoDex(e.target.value)} /></p>
+      <p>dexRate: <input onChange={(e) => inputdexRate(e.target.value)} /></p>
+      <p>liquidity percentage: <input onChange={(e) => inputliquidity(e.target.value)} /></p>
+      <p>lockUpTime: <input onChange={(e) => inputlockUpTime(e.target.value)} /></p>
+      <p>rate: <input onChange={(e) => inputrate(e.target.value)} /></p>
+      <p>amount: <input onChange={(e) => inputamount(e.target.value)} /></p>
+      <p>startTime: <input onChange={(e) => inputstartTime(e.target.value)} /></p>
+      <p>endTime: <input onChange={(e) => inputendTime(e.target.value)} /></p>
+      <p>minVal: <input onChange={(e) => inputminVal(e.target.value)} /></p>
+      <p>maxVal: <input onChange={(e) => inputmaxVal(e.target.value)} /></p>
+      <p>softCap: <input onChange={(e) => inputsoftCap(e.target.value)} /></p>
+      <p>hardCap: <input onChange={(e) => inputhardCap(e.target.value)} /></p>
+      <p>vesStartTime: <input onChange={(e) => inputvesStartTime(e.target.value)} /></p>
+      <p>startPercent: <input onChange={(e) => inputstartPercent(e.target.value)} /></p>
+      <p>cliffTime: <input onChange={(e) => inputcliffTime(e.target.value)} /></p>
+      <p>cliffPercent: <input onChange={(e) => inputcliffPercent(e.target.value)} /></p>
+      <p>vesting: <input onChange={(e) => inputvesting(e.target.value)} /></p>
+      {isConnected ? <button onClick={() => createPreSale()}>Create Presale</button> : ""}
+      {isConnected ? <button onClick={() => getPreSaleInstance()}>getPresale</button> : ""}
+      <p>Buy Token: <input onChange={(e) => inputBuyValue(e.target.value)} /></p>
+      {isConnected ? <button onClick={() => buyToken(presaleAddress, buyValue)}>Buy Token</button> : ""}
+
+
     </div>
   )
 
