@@ -19,15 +19,8 @@ const getToken = async (contractAddress) => {
 const approve = async (address, val) => {
   try {
     const signer = provider.getSigner();
-    let balanceOf = await ERC20.balanceOf(await signer.getAddress());
-    balanceOf = ethers.utils.formatEther(balanceOf.toString());
-    console.log(balanceOf);
-    console.log(val);
-    if (balanceOf >= val){
-      val = ethers.utils.parseEther(val.toString());
-      ERC20.connect(signer).approve(address, val);
-    }
-    return {balanceOf};
+    val = ethers.utils.parseEther(val.toString());
+    ERC20.connect(signer).approve(address, val);
   } catch (err) {
     console.log(err);
   }
@@ -48,5 +41,5 @@ const getBalance = async () => {
 export {
   getBalance,
   getToken,
-  approve
+  approve,
 };

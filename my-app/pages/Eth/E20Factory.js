@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 import provider from './provider';
-const E20Factory = require('./artifacts/E20Factory.json')
+const E20Factory = require('./artifacts/E20Factory.json');
 
-const contractAddress = "0x03dE11A53f272FF3cC5D901aa1f32097F70EcCd4";
+const contractAddress = "0x9c215E9a1f66aA84D9537A0199654703FD9fD85D";
 
 const IE20Factory = new ethers.Contract(
   contractAddress, 
