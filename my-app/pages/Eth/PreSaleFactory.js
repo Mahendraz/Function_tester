@@ -4,7 +4,7 @@ const Token = require('./artifacts/Token.json');
 const FactoryPreSale = require('./artifacts/FactoryPreSale.json');
 const preSale = require('./artifacts/PreSale.json');
 
-const contractAddress = "0x7d07771b4CB3D69980132f1Ef668193db307A3a5";
+const contractAddress = "0x5C59558a82D01FA51E536207e957b7819D1CbfE6";
 
 const getInstance = (contractAddress) => {
   return new ethers.Contract(contractAddress, Token.abi, provider);
@@ -47,15 +47,6 @@ const creatingPreSale = async (
     } else {
       amount = ethers.utils.parseUnits(amount, decimals);
     }
-    console.log({amount, al})
-    console.log({vesting})
-
-  //  if (vesting === true) {
-  //    amount = balance;
- //   } else {
-  //    amount = ethers.utils.parseUnits(amount, decimals);
-  //  }
-
     const tx = await IPresaleFactory
       .connect(signer)
       .createPreSale(
@@ -92,30 +83,16 @@ const getPreSale = async (tokenAddress) => {
     );
     const dex = await pre.autoDex();
     const sale = await pre.sale();
-    return { dex, sale, preSale, preSaleAddress };
+    const token = await getInstance(tokenAddress);
+    let balanceOf = await token.balanceOf(await preSaleAddress);
+    balanceOf = ethers.utils.formatEther(balanceOf.toString());
+    return { dex, sale, preSale, preSaleAddress, balanceOf };
   } catch (err) {
     console.log(err);
   }
 };
-const buyToken = async (preSaleAddress, amount) => {
-  try {
-    const signer = provider.getSigner();
-    const pre = new ethers.Contract(
-      preSaleAddress,
-      preSale.abi,
-      provider
-    );
-    console.log({preSaleAddress, amount});
-    const tx = await pre
-      .connect(signer)
-      .buyTokens([],{ value: ethers.utils.parseEther(amount.toString()) });
-    await tx.wait();
-  } catch (err) {
-    console.log(err);
-  }
-};
+
 export {
   creatingPreSale,
-  getPreSale,
-  buyToken
+  getPreSale
 };

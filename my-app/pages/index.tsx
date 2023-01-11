@@ -1,9 +1,10 @@
 import { ethers } from "ethers";
-import { getAddress, isAddress } from "ethers/lib/utils";
+//import { getAddress, isAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 import {approve, getBalance, getToken} from "./Eth/Token.js";
-import {mintToken} from "./Eth/E20Factory";
-import {creatingPreSale, getPreSale, buyToken} from "./Eth/PreSaleFactory";
+import {mintToken} from "./Eth/E20Factory.js";
+import {creatingPreSale, getPreSale} from "./Eth/PreSaleFactory.js";
+import {buyToken, withdrawETH, withdrawToken, addLiquidity, withdrawLiquidity} from "./Eth/PreSale.js";
 
 export default function Home() {
 
@@ -41,6 +42,7 @@ export default function Home() {
   const [vesting, setVesting] = useState(Boolean);
   const [buyValue, setBuyValue] = useState();
   const [presaleAddress, setPresaleAddress] = useState();
+  const [presaleBalance, setPresaleBalance] = useState();
 
   function inputtokenAddress(text) {
     settokenAddress(text);
@@ -178,6 +180,7 @@ export default function Home() {
       const minBuy = ethers.utils.formatEther((presale?.sale.minVal).toString());
       const maxBuy = ethers.utils.formatEther((presale?.sale.maxVal).toString());
       setPresaleAddress(presale?.preSaleAddress);
+      setPresaleBalance(presale?.balanceOf);
       console.log({startTime, endTime});
       console.log({price});
       console.log({minBuy, maxBuy});
@@ -240,7 +243,7 @@ export default function Home() {
       <p>Decimals: <input onChange={(e) => inputDecimals(e.target.value)} /></p>
       {isConnected ? <button onClick={() => mint()}>MintToken</button> : ""}
 
-      <p>Creating new Presale address: 0x7d07771b4CB3D69980132f1Ef668193db307A3a5</p>
+      <p>Creating new Presale address: 0x5C59558a82D01FA51E536207e957b7819D1CbfE6</p>
       <p>tokenAddress: <input onChange={(e) => inputtokenAddress(e.target.value)} /></p>
       <p>autoDex: <input onChange={(e) => inputautoDex(e.target.value)} /></p>
       <p>dexRate: <input onChange={(e) => inputdexRate(e.target.value)} /></p>
@@ -261,8 +264,14 @@ export default function Home() {
       <p>vesting: <input onChange={(e) => inputvesting(e.target.value)} /></p>
       {isConnected ? <button onClick={() => createPreSale()}>Create Presale</button> : ""}
       {isConnected ? <button onClick={() => getPreSaleInstance()}>getPresale</button> : ""}
+      <p>presaleAddress, {presaleAddress}</p>
+      <p>presaleBalance, {presaleBalance}</p>
       <p>Buy Token: <input onChange={(e) => inputBuyValue(e.target.value)} /></p>
       {isConnected ? <button onClick={() => buyToken(presaleAddress, buyValue)}>Buy Token</button> : ""}
+      {isConnected ? <button onClick={() => addLiquidity(presaleAddress)}>addLiquidity</button> : ""}
+      {isConnected ? <button onClick={() => withdrawLiquidity(presaleAddress)}>withdrawLiquidity</button> : ""}
+      {isConnected ? <button onClick={() => withdrawETH(presaleAddress)}>withdrawETH</button> : ""}
+      {isConnected ? <button onClick={() => withdrawToken(presaleAddress)}>withdrawToken</button> : ""}
 
 
     </div>
