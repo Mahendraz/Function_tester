@@ -30,7 +30,7 @@ const getBalance = async () => {
     try {
       const signer = provider.getSigner();
       let balanceOf = await ERC20.balanceOf(await signer.getAddress());
-      balanceOf = ethers.utils.formatEther(balanceOf.toString());
+      balanceOf = ethers.utils.formatEther(balanceOf.toString()); 
       return {balanceOf};
     } catch (err) {
       console.log(err);
