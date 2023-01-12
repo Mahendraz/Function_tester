@@ -5,9 +5,11 @@ import {approve, getBalance, getToken} from "./Eth/Token.js";
 import {mintToken} from "./Eth/E20Factory.js";
 import {creatingPreSale, getPreSale} from "./Eth/PreSaleFactory.js";
 import {buyToken, withdrawETH, withdrawToken, addLiquidity, withdrawLiquidity} from "./Eth/PreSale.js";
+import {checkWhitelist, createWhitelist, getProof} from "./Eth/whitelist.js";
 
 export default function Home() {
 
+  let proof=[];
   const [isConnected, setIsConnected] = useState(false);
   const [hasMetamask, setHasMetamask] = useState(false);
   const [account, setAccount] = useState(String);
@@ -23,8 +25,10 @@ export default function Home() {
   const [decimals, setDecimals] = useState();
   const [deployedContractAddress, setDeployedContractAddress] = useState();
 
+  const [whitelist, setWhitelist] = useState();
+  const [setedWhitelist, setSetedWhitelist] = useState();
   const [autoDex, setAutoDex] = useState();
-  const [dexRate, setDexRate] = useState(Boolean);
+  const [dexRate, setDexRate] = useState();
   const [liquidity, setLiquidity] = useState();
   const [lockUpTime, setLockUpTime] = useState();
   const [rate, setRate] = useState();
@@ -39,7 +43,7 @@ export default function Home() {
   const [startPercent, setStartPercent] = useState();
   const [cliffTime, setCliffTime] = useState();
   const [cliffPercent, setCliffPrecent] = useState();
-  const [vesting, setVesting] = useState(Boolean);
+  const [vesting, setVesting] = useState();
   const [buyValue, setBuyValue] = useState();
   const [presaleAddress, setPresaleAddress] = useState();
   const [presaleBalance, setPresaleBalance] = useState();
@@ -64,6 +68,9 @@ export default function Home() {
   }
   function inputDecimals(text) {
     setDecimals(text);
+  }
+  function inputwhitelist(text) {
+    setWhitelist(text);
   }
   function inputautoDex(text) {
     setAutoDex(text);
@@ -160,6 +167,15 @@ export default function Home() {
       console.log(e);
     }
   }
+  async function getingproof() {
+    try {
+      const tx = await getProof();
+      proof = tx;
+      console.log(proof);
+    } catch (e) {
+      console.log(e);
+    }
+  }
   function unixHumanTime(unix_timestamp){
     let date = new Date(unix_timestamp * 1000);
     let hours = date.getHours();
@@ -181,9 +197,11 @@ export default function Home() {
       const maxBuy = ethers.utils.formatEther((presale?.sale.maxVal).toString());
       setPresaleAddress(presale?.preSaleAddress);
       setPresaleBalance(presale?.balanceOf);
+      setSetedWhitelist(presale?.sale.whitelist);
       console.log({startTime, endTime});
       console.log({price});
       console.log({minBuy, maxBuy});
+      console.log(setedWhitelist);
     } catch (e) {
       console.log(e);
     }
@@ -191,7 +209,8 @@ export default function Home() {
   async function createPreSale() {
     try {
       await creatingPreSale(
-        tokenAddress, 
+        tokenAddress,
+        whitelist, 
         autoDex, 
         dexRate, 
         liquidity, 
@@ -243,8 +262,9 @@ export default function Home() {
       <p>Decimals: <input onChange={(e) => inputDecimals(e.target.value)} /></p>
       {isConnected ? <button onClick={() => mint()}>MintToken</button> : ""}
 
-      <p>Creating new Presale address: 0x5C59558a82D01FA51E536207e957b7819D1CbfE6</p>
+      <p>Creating new Presale address: 0xcd7b124976f0Cde2c2573BB89eCF66f5a26063f0</p>
       <p>tokenAddress: <input onChange={(e) => inputtokenAddress(e.target.value)} /></p>
+      <p>whitelist: <input onChange={(e) => inputwhitelist(e.target.value)} /></p>
       <p>autoDex: <input onChange={(e) => inputautoDex(e.target.value)} /></p>
       <p>dexRate: <input onChange={(e) => inputdexRate(e.target.value)} /></p>
       <p>liquidity percentage: <input onChange={(e) => inputliquidity(e.target.value)} /></p>
@@ -266,13 +286,16 @@ export default function Home() {
       {isConnected ? <button onClick={() => getPreSaleInstance()}>getPresale</button> : ""}
       <p>presaleAddress, {presaleAddress}</p>
       <p>presaleBalance, {presaleBalance}</p>
-      <p>Buy Token: <input onChange={(e) => inputBuyValue(e.target.value)} /></p>
-      {isConnected ? <button onClick={() => buyToken(presaleAddress, buyValue)}>Buy Token</button> : ""}
+      <p>Buy Token: <input onChange={(e) => inputBuyValue(e.target.value) }/></p>
+      {isConnected ? <button onClick={() => buyToken(presaleAddress, buyValue, setedWhitelist, proof)}>Buy Token</button> : ""}
       {isConnected ? <button onClick={() => addLiquidity(presaleAddress)}>addLiquidity</button> : ""}
       {isConnected ? <button onClick={() => withdrawLiquidity(presaleAddress)}>withdrawLiquidity</button> : ""}
       {isConnected ? <button onClick={() => withdrawETH(presaleAddress)}>withdrawETH</button> : ""}
       {isConnected ? <button onClick={() => withdrawToken(presaleAddress)}>withdrawToken</button> : ""}
-
+      <p>Whitelist, active: {setedWhitelist}</p>
+      {isConnected ? <button onClick={() => createWhitelist(presaleAddress)}>setRoot</button> : ""}
+      {isConnected ? <button onClick={() => getingproof()}>getProof</button> : ""}
+      {isConnected ? <button onClick={() => checkWhitelist(presaleAddress, proof)}>checkWhitelist</button> : ""}
 
     </div>
   )

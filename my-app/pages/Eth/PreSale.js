@@ -7,7 +7,7 @@ const getInstance = (contractAddress) => {
   return new ethers.Contract(contractAddress, Token.abi, provider);
 };
 
-const buyToken = async (preSaleAddress, amount) => {
+const buyToken = async (preSaleAddress, amount, whitelist, proof) => {
   try {
     const signer = provider.getSigner();
     const pre = new ethers.Contract(
@@ -15,10 +15,18 @@ const buyToken = async (preSaleAddress, amount) => {
       preSale.abi,
       provider
     );
+    if (whitelist){
+    const tx = await pre
+      .connect(signer)
+      .buyTokens(proof,{ value: ethers.utils.parseEther(amount.toString()) });
+    await tx.wait();
+    }else
+    {
     const tx = await pre
       .connect(signer)
       .buyTokens([],{ value: ethers.utils.parseEther(amount.toString()) });
-    await tx.wait();
+    await tx.wait();  
+    }
   } catch (err) {
     console.log(err);
   }

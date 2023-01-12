@@ -4,7 +4,7 @@ const Token = require('./artifacts/Token.json');
 const FactoryPreSale = require('./artifacts/FactoryPreSale.json');
 const preSale = require('./artifacts/PreSale.json');
 
-const contractAddress = "0x5C59558a82D01FA51E536207e957b7819D1CbfE6";
+const contractAddress = "0xcd7b124976f0Cde2c2573BB89eCF66f5a26063f0";
 
 const getInstance = (contractAddress) => {
   return new ethers.Contract(contractAddress, Token.abi, provider);
@@ -18,6 +18,7 @@ const IPresaleFactory = new ethers.Contract(
 
 const creatingPreSale = async (
   tokenAddress,
+  whitelist,
   enabled, //target_dex
   dexRate, //uniswap_listing_rate
   liquidity, //uniswap_liquidity_percent
@@ -52,7 +53,7 @@ const creatingPreSale = async (
       .createPreSale(
         [enabled, dexRate, liquidity, lockUpTime],
         [
-          false,
+          whitelist,
           rate,
           amount,
           startTime,
